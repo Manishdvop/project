@@ -1,0 +1,58 @@
+// clear DB (optional, only if you want to start fresh)
+MATCH (n) DETACH DELETE n;
+
+// Create hospitals (idempotent)
+MERGE (h1:Hospital {name: 'Nashik General Hospital'})
+  SET h1.location = 'Nashik', h1.rating = 4.2
+MERGE (h2:Hospital {name: 'City Hospital'})
+  SET h2.location = 'Nashik', h2.rating = 4.5
+MERGE (h3:Hospital {name: 'Medical Center'})
+  SET h3.location = 'Pune', h3.rating = 4.7
+MERGE (h4:Hospital {name: 'Health Care'})
+  SET h4.location = 'Mumbai', h4.rating = 4.0;
+
+// Create specializations
+MERGE (s1:Specialization {name: 'Pediatric'})
+MERGE (s2:Specialization {name: 'Gynaec'})
+MERGE (s3:Specialization {name: 'Orthopedic'})
+MERGE (s4:Specialization {name: 'Cardiology'});
+
+// Create doctors
+MERGE (d1:Doctor {name: 'Dr. Deshmukh'}) SET d1.experience = 15
+MERGE (d2:Doctor {name: 'Dr. Sharma'})    SET d2.experience = 10
+MERGE (d3:Doctor {name: 'Dr. Verma'})     SET d3.experience = 12;
+
+// Create relationships using MATCH (safe across queries)
+MATCH (h1:Hospital {name: 'Nashik General Hospital'}), (s1:Specialization {name: 'Pediatric'})
+MERGE (h1)-[:HAS_SPECIALIZATION]->(s1);
+
+MATCH (h1:Hospital {name: 'Nashik General Hospital'}), (s2:Specialization {name: 'Gynaec'})
+MERGE (h1)-[:HAS_SPECIALIZATION]->(s2);
+
+MATCH (h1:Hospital {name: 'Nashik General Hospital'}), (s3:Specialization {name: 'Orthopedic'})
+MERGE (h1)-[:HAS_SPECIALIZATION]->(s3);
+
+MATCH (h2:Hospital {name: 'City Hospital'}), (s1:Specialization {name: 'Pediatric'})
+MERGE (h2)-[:HAS_SPECIALIZATION]->(s1);
+
+MATCH (h2:Hospital {name: 'City Hospital'}), (s4:Specialization {name: 'Cardiology'})
+MERGE (h2)-[:HAS_SPECIALIZATION]->(s4);
+
+MATCH (h3:Hospital {name: 'Medical Center'}), (s2:Specialization {name: 'Gynaec'})
+MERGE (h3)-[:HAS_SPECIALIZATION]->(s2);
+
+MATCH (h3:Hospital {name: 'Medical Center'}), (s3:Specialization {name: 'Orthopedic'})
+MERGE (h3)-[:HAS_SPECIALIZATION]->(s3);
+
+// Doctor visits
+MATCH (d1:Doctor {name: 'Dr. Deshmukh'}), (h1:Hospital {name: 'Nashik General Hospital'})
+MERGE (d1)-[:VISITS]->(h1);
+
+MATCH (d1:Doctor {name: 'Dr. Deshmukh'}), (h2:Hospital {name: 'City Hospital'})
+MERGE (d1)-[:VISITS]->(h2);
+
+MATCH (d2:Doctor {name: 'Dr. Sharma'}), (h1:Hospital {name: 'Nashik General Hospital'})
+MERGE (d2)-[:VISITS]->(h1);
+
+MATCH (d3:Doctor {name: 'Dr. Verma'}), (h3:Hospital {name: 'Medical Center'})
+MERGE (d3)-[:VISITS]->(h3);
